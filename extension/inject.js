@@ -299,21 +299,65 @@
     return matches;
   }
 
+  // ---------- Firewall policy (real origin / registrable-site comparison) ----------
+  //
+  // Deterministic, minimal policy: a sensitive-field egress is allowed only
+  // when it targets the same "site" as the current page. No trust matrix,
+  // no allowlist to maintain - just a same-site check with real handling for
+  // localhost dev origins (where "*.localhost" subdomains must NOT be
+  // collapsed into one trusted site) and a practical eTLD+1 approximation
+  // for public domains (no public-suffix-list dependency, so multi-part
+  // TLDs like "co.uk" are a known imprecision - see report).
+
+  function isIpLiteral(hostname) {
+    return /^(\d{1,3}\.){3}\d{1,3}$/.test(hostname) || hostname.includes(':');
+  }
+
+  function siteFor(url) {
+    const hostname = url.hostname;
+    if (isIpLiteral(hostname) || hostname === 'localhost' || hostname.endsWith('.localhost')) {
+      // Each distinct IP literal / *.localhost host is treated as its own
+      // site - collapsing them would let "attacker.localhost" ride on
+      // "victim.localhost"'s trust during local development.
+      return `${url.protocol}//${hostname}`;
+    }
+    const labels = hostname.split('.');
+    const registrable = labels.length <= 2 ? hostname : labels.slice(-2).join('.');
+    return `${url.protocol}//${registrable}`;
+  }
+
+  function isSameSite(pageUrl, destUrl) {
+    try {
+      return siteFor(pageUrl) === siteFor(destUrl);
+    } catch (_) {
+      return false;
+    }
+  }
+
   // ---------- Event construction ----------
 
-  function severityFor(fieldType) {
+  const SEVERITY_RANK = { low: 1, medium: 2, high: 3, critical: 4 };
+
+  function severityFor(fieldType, action) {
+    let base;
     switch (fieldType) {
       case 'password':
       case 'credit-card':
       case 'cvv':
       case 'ssn':
-        return 'critical';
+        base = 'critical';
+        break;
       case 'email':
       case 'phone':
-        return 'medium';
+        base = 'medium';
+        break;
       default:
-        return 'low';
+        base = 'low';
     }
+    // A BLOCKED verdict is a confirmed active cross-site egress attempt,
+    // not just a passive observation - floor it at "high".
+    if (action === 'BLOCKED' && SEVERITY_RANK[base] < SEVERITY_RANK.high) return 'high';
+    return base;
   }
 
   function safeDestination(url) {
@@ -325,7 +369,7 @@
     }
   }
 
-  function emitEvents(matches, { url, method, vector, scriptOrigin }) {
+  function emitEvents(matches, { url, method, vector, scriptOrigin, action = 'OBSERVED' }) {
     const destination = safeDestination(url);
     const timestamp = new Date().toISOString();
     for (const m of matches) {
@@ -334,12 +378,12 @@
         website: location.hostname,
         field_type: m.fieldType,
         script_origin: scriptOrigin,
-        event_type: 'exfiltration_detected',
+        event_type: action === 'BLOCKED' ? 'network_exfiltration' : 'exfiltration_detected',
         destination,
         vector,
-        policy: 'default',
-        action: 'OBSERVED',
-        severity: severityFor(m.fieldType),
+        policy: action === 'BLOCKED' ? 'cross-site-egress-blocked' : 'default',
+        action,
+        severity: severityFor(m.fieldType, action),
         metadata: {
           field_id: m.fieldId,
           field_hash: m.hash,
@@ -352,22 +396,51 @@
     }
   }
 
-  // ---------- fetch() instrumentation ----------
+  // ---------- fetch() instrumentation + firewall enforcement ----------
+  //
+  // This is the P0 enforcement point. The decision is made entirely here, in
+  // the page's own MAIN world, before the real fetch ever runs - the backend
+  // is never in the loop and is not required for blocking to work.
 
   const nativeFetch = window.fetch.bind(window);
 
-  window.fetch = function unmaskFetch(input, init) {
+  window.fetch = async function unmaskFetch(input, init) {
     const scriptOrigin = attributeScript();
     const method =
       (init && init.method) || (typeof Request !== 'undefined' && input instanceof Request ? input.method : 'GET');
     const url = typeof Request !== 'undefined' && input instanceof Request ? input.url : input;
 
-    extractBodyText(input, init)
-      .then((bodyText) => correlate(bodyText))
-      .then((matches) => {
-        if (matches.length) emitEvents(matches, { url, method, vector: 'fetch', scriptOrigin });
-      })
-      .catch(() => {});
+    let matches = [];
+    try {
+      const bodyText = await extractBodyText(input, init);
+      matches = await correlate(bodyText);
+    } catch (_) {
+      matches = [];
+    }
+
+    if (matches.length) {
+      let destUrl = null;
+      try {
+        destUrl = new URL(url, location.href);
+      } catch (_) {}
+
+      // Fail closed: an unparseable destination for a request that already
+      // matched a sensitive-field fingerprint is treated as untrusted.
+      const allowed = destUrl ? isSameSite(new URL(location.href), destUrl) : false;
+
+      if (!allowed) {
+        emitEvents(matches, { url, method, vector: 'fetch', scriptOrigin, action: 'BLOCKED' });
+        console.warn('UNMASK BLOCKED A SENSITIVE DATA EXFILTRATION ATTEMPT', {
+          destination: destUrl ? destUrl.origin : url,
+          field_type: matches[0].fieldType
+        });
+        // The original request is never sent. Reject with the same error
+        // shape a real network failure produces - no fabricated response.
+        return Promise.reject(Object.assign(new TypeError('Failed to fetch'), { unmaskBlocked: true }));
+      }
+
+      emitEvents(matches, { url, method, vector: 'fetch', scriptOrigin, action: 'OBSERVED' });
+    }
 
     return nativeFetch(input, init);
   };

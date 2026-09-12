@@ -11,7 +11,7 @@ const MAX_ATTEMPTS = 2;
 
 const ALLOWED_FIELD_TYPES = new Set(['password', 'credit-card', 'cvv', 'ssn', 'email', 'phone']);
 const ALLOWED_VECTORS = new Set(['fetch', 'xhr']);
-const ALLOWED_ACTIONS = new Set(['OBSERVED']);
+const ALLOWED_ACTIONS = new Set(['OBSERVED', 'BLOCKED']);
 const ALLOWED_SEVERITIES = new Set(['low', 'medium', 'high', 'critical']);
 const HASH_RE = /^[a-f0-9]{64}$/;
 
@@ -69,15 +69,42 @@ async function sendEvent(event, attempt = 1) {
   }
 }
 
+// Minimal P0 user-facing signal: a badge on the extension icon for the tab
+// where a block happened. No dashboard/popup - just real chrome.action state.
+const blockCounts = new Map(); // tabId -> count
+
+function signalBlocked(tabId) {
+  if (typeof tabId !== 'number') return;
+  const count = (blockCounts.get(tabId) || 0) + 1;
+  blockCounts.set(tabId, count);
+  chrome.action.setBadgeBackgroundColor({ tabId, color: '#d32f2f' });
+  chrome.action.setBadgeText({ tabId, text: String(count) });
+  console.warn('UNMASK BLOCKED A SENSITIVE DATA EXFILTRATION ATTEMPT', { tabId, count });
+}
+
+chrome.tabs.onUpdated.addListener((tabId, changeInfo) => {
+  if (changeInfo.status === 'loading') {
+    blockCounts.delete(tabId);
+    chrome.action.setBadgeText({ tabId, text: '' });
+  }
+});
+
+chrome.tabs.onRemoved.addListener((tabId) => blockCounts.delete(tabId));
+
 chrome.runtime.onMessage.addListener((message, sender) => {
   if (!message || message.type !== 'UNMASK_EVENT' || !isValidPayload(message.payload)) {
     return false;
   }
 
+  const tabId = sender.tab ? sender.tab.id : undefined;
   const event = {
     ...message.payload,
-    tab_id: sender.tab ? sender.tab.id : undefined
+    tab_id: tabId
   };
+
+  if (event.action === 'BLOCKED') {
+    signalBlocked(tabId);
+  }
 
   sendEvent(event);
   return false;

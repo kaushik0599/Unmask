@@ -1,11 +1,14 @@
 {
   "manifest_version": 3,
   "name": "UNMASK Data X-Ray",
-  "version": "0.1.0",
-  "description": "Detects sensitive browser field exfiltration and reports sanitized, evidence-based security events to the UNMASK backend.",
+  "version": "0.2.0",
+  "description": "Detects and blocks sensitive browser field exfiltration, reporting sanitized, evidence-based security events to the UNMASK backend.",
   "minimum_chrome_version": "111",
   "background": {
     "service_worker": "background.js"
+  },
+  "action": {
+    "default_title": "UNMASK - sensitive data exfiltration monitor"
   },
   "host_permissions": [
     "http://localhost:3001/*"

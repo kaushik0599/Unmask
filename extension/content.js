@@ -8,7 +8,7 @@
 (() => {
   const ALLOWED_FIELD_TYPES = new Set(['password', 'credit-card', 'cvv', 'ssn', 'email', 'phone']);
   const ALLOWED_VECTORS = new Set(['fetch', 'xhr']);
-  const ALLOWED_ACTIONS = new Set(['OBSERVED']);
+  const ALLOWED_ACTIONS = new Set(['OBSERVED', 'BLOCKED']);
   const ALLOWED_SEVERITIES = new Set(['low', 'medium', 'high', 'critical']);
   const HASH_RE = /^[a-f0-9]{64}$/;
 
@@ -73,6 +73,14 @@
 
     const sanitized = sanitizeEvent(data.payload);
     if (!sanitized) return;
+
+    if (sanitized.action === 'BLOCKED') {
+      console.warn('UNMASK BLOCKED A SENSITIVE DATA EXFILTRATION ATTEMPT', {
+        website: sanitized.website,
+        destination: sanitized.destination,
+        field_type: sanitized.field_type
+      });
+    }
 
     try {
       chrome.runtime.sendMessage({ type: 'UNMASK_EVENT', payload: sanitized }).catch(() => {});
