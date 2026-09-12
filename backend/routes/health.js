@@ -1,10 +1,22 @@
 const express = require('express');
 
-module.exports = () => {
+module.exports = (db) => {
   const router = express.Router();
 
   router.get('/', (req, res) => {
-    res.json({ status: 'ok', service: 'unmasked-backend', time: new Date().toISOString() });
+    let database = 'ok';
+    try {
+      db.prepare('SELECT 1').get();
+    } catch (err) {
+      database = 'error';
+    }
+
+    res.json({
+      status: database === 'ok' ? 'ok' : 'degraded',
+      service: 'unmasked-backend',
+      database,
+      time: new Date().toISOString()
+    });
   });
 
   return router;

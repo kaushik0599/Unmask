@@ -125,6 +125,55 @@ test('GET /incidents lists incidents ordered by most recently updated', async (t
   assert.equal(list[0].website, 'b.example');
 });
 
+test('a stale open incident does not silently absorb a new, unrelated session', async (t) => {
+  const { server, baseUrl, db } = setupServer();
+  t.after(() => server.close());
+
+  const first = await fetch(`${baseUrl}/events`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(validEvent({ website: 'stale.example' }))
+  });
+  const firstBody = await first.json();
+
+  // Simulate this incident having gone quiet well beyond the session window.
+  const longAgo = new Date(Date.now() - 60 * 60 * 1000).toISOString();
+  db.prepare('UPDATE incidents SET updated_at = ? WHERE id = ?').run(longAgo, firstBody.incident.id);
+
+  const second = await fetch(`${baseUrl}/events`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(validEvent({ website: 'stale.example' }))
+  });
+  const secondBody = await second.json();
+
+  assert.notEqual(secondBody.incident.id, firstBody.incident.id);
+});
+
+test('an explicit incident_id still attaches even to a stale incident', async (t) => {
+  const { server, baseUrl, db } = setupServer();
+  t.after(() => server.close());
+
+  const first = await fetch(`${baseUrl}/events`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(validEvent({ website: 'explicit.example' }))
+  });
+  const firstBody = await first.json();
+
+  const longAgo = new Date(Date.now() - 60 * 60 * 1000).toISOString();
+  db.prepare('UPDATE incidents SET updated_at = ? WHERE id = ?').run(longAgo, firstBody.incident.id);
+
+  const second = await fetch(`${baseUrl}/events`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(validEvent({ website: 'explicit.example', incident_id: firstBody.incident.id }))
+  });
+  const secondBody = await second.json();
+
+  assert.equal(secondBody.incident.id, firstBody.incident.id);
+});
+
 test('GET /incidents/:id returns 404 for unknown incident', async (t) => {
   const { server, baseUrl } = setupServer();
   t.after(() => server.close());

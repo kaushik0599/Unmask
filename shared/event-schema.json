@@ -52,7 +52,7 @@
     },
     "action": {
       "type": "string",
-      "description": "Action taken as a result of the event (e.g. 'blocked', 'allowed', 'flagged')."
+      "description": "Action taken as a result of the event (e.g. 'OBSERVED', 'BLOCKED', 'ALLOWED')."
     },
     "severity": {
       "type": "string",

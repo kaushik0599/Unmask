@@ -3,6 +3,14 @@ const crypto = require('crypto');
 const SEVERITY_RANK = { low: 1, medium: 2, high: 3, critical: 4 };
 const VALID_SEVERITIES = Object.keys(SEVERITY_RANK);
 
+// An "open" incident only keeps absorbing new events for the same website
+// while it is still active. Without this window, a website visited again
+// hours or days later would silently glue onto a long-stale incident,
+// producing an incoherent, ever-growing record instead of one attack
+// session. 30 minutes mirrors the extension's own sensitive-field registry
+// TTL, a reasonable single-session boundary for this pipeline.
+const INCIDENT_SESSION_WINDOW_MS = 30 * 60 * 1000;
+
 function maxSeverity(a, b) {
   const rankA = SEVERITY_RANK[a] || SEVERITY_RANK.low;
   const rankB = SEVERITY_RANK[b] || SEVERITY_RANK.low;
@@ -50,12 +58,17 @@ function ingestEvent(db, input) {
 
   let incident = null;
   if (input.incident_id) {
+    // Explicit correlation always wins, regardless of how old the incident
+    // is - the caller is making a direct claim about lineage.
     incident = db.prepare('SELECT * FROM incidents WHERE id = ?').get(input.incident_id);
   }
   if (!incident) {
-    incident = db
-      .prepare("SELECT * FROM incidents WHERE website = ? AND status = 'open' ORDER BY created_at DESC LIMIT 1")
+    const candidate = db
+      .prepare("SELECT * FROM incidents WHERE website = ? AND status = 'open' ORDER BY updated_at DESC LIMIT 1")
       .get(input.website);
+    if (candidate && Date.now() - new Date(candidate.updated_at).getTime() <= INCIDENT_SESSION_WINDOW_MS) {
+      incident = candidate;
+    }
   }
 
   if (!incident) {

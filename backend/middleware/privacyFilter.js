@@ -20,10 +20,11 @@ const RESTRICTED_TERMS = [
   'secret'
 ];
 
-// Structural classification fields are allowed to legitimately hold values
-// like "password" (e.g. field_type describing what kind of field was
-// targeted) without that being an actual secret leak.
-const EXEMPT_KEYS = new Set(['field_type', 'event_type']);
+// Structural classification/identifier fields are allowed to legitimately
+// hold values like "password" (e.g. field_type describing what kind of
+// field was targeted, or field_id echoing a real DOM id="password"
+// attribute) without that being an actual secret leak.
+const EXEMPT_KEYS = new Set(['field_type', 'event_type', 'field_id']);
 
 function containsRestrictedTerm(value) {
   const lower = String(value).toLowerCase();

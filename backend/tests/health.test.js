@@ -11,4 +11,5 @@ test('GET /health returns ok status', async (t) => {
 
   assert.equal(res.status, 200);
   assert.equal(body.status, 'ok');
+  assert.equal(body.database, 'ok');
 });

@@ -115,6 +115,55 @@ test('privacy violation rejects payloads with a raw token value', async (t) => {
   assert.equal(body.error, 'PRIVACY_VIOLATION');
 });
 
+test('malformed input is rejected when a required field has the wrong type', async (t) => {
+  const { server, baseUrl } = setupServer();
+  t.after(() => server.close());
+
+  const res = await fetch(`${baseUrl}/events`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(validEvent({ website: { nested: 'object' } }))
+  });
+  const body = await res.json();
+
+  assert.equal(res.status, 400);
+  assert.equal(body.error, 'MALFORMED_INPUT');
+
+  // A single malformed event must never take the server down.
+  const health = await fetch(`${baseUrl}/health`);
+  assert.equal(health.status, 200);
+});
+
+test('malformed input is rejected for an unparseable timestamp', async (t) => {
+  const { server, baseUrl } = setupServer();
+  t.after(() => server.close());
+
+  const res = await fetch(`${baseUrl}/events`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(validEvent({ timestamp: 'not-a-real-timestamp' }))
+  });
+  const body = await res.json();
+
+  assert.equal(res.status, 400);
+  assert.equal(body.error, 'MALFORMED_INPUT');
+});
+
+test('a field_id matching a real DOM id like "password" is not a privacy violation', async (t) => {
+  const { server, baseUrl } = setupServer();
+  t.after(() => server.close());
+
+  const res = await fetch(`${baseUrl}/events`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(validEvent({ metadata: { field_id: 'password', field_hash: 'a'.repeat(64), field_length: 8 } }))
+  });
+  const body = await res.json();
+
+  assert.equal(res.status, 201);
+  assert.equal(body.event.metadata.field_id, 'password');
+});
+
 test('field_type "password" as a classification label is still allowed', async (t) => {
   const { server, baseUrl } = setupServer();
   t.after(() => server.close());

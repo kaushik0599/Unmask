@@ -36,6 +36,17 @@ if (require.main === module) {
   app.listen(PORT, () => {
     console.log(`UNMASK backend listening on port ${PORT}`);
   });
+
+  // Demo-reliability safety net: a single unexpected error (sync errors
+  // inside a request are already handled by Express's own error middleware
+  // above) must never take the whole backend down mid-demo. Never logs
+  // request data - only the error itself.
+  process.on('uncaughtException', (err) => {
+    console.error('[UNMASK] uncaught exception, backend continues running:', err.message);
+  });
+  process.on('unhandledRejection', (reason) => {
+    console.error('[UNMASK] unhandled rejection, backend continues running:', reason instanceof Error ? reason.message : reason);
+  });
 }
 
 module.exports = { createApp };

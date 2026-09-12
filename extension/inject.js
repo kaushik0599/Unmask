@@ -24,6 +24,16 @@
   let anonCounter = 0;
 
   const hasCrypto = !!(window.crypto && window.crypto.subtle);
+
+  // Real, minimal status readout for host pages (e.g. the UNMASK console) to
+  // check genuine extension state - not a security boundary, just a status
+  // flag. Reflects exactly what this script can actually do on this page.
+  window.__unmaskStatus = {
+    injected: true,
+    dataXRayActive: hasCrypto,
+    firewallActive: hasCrypto,
+  };
+
   if (!hasCrypto) {
     // Real limitation: Web Crypto's subtle API is only available in secure
     // contexts (https, or http://localhost). On plain http origins this

@@ -11,7 +11,7 @@
     "default_title": "UNMASK - sensitive data exfiltration monitor"
   },
   "host_permissions": [
-    "http://localhost:3001/*"
+    "http://localhost:4000/*"
   ],
   "content_scripts": [
     {

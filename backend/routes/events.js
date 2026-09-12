@@ -3,6 +3,8 @@ const { privacyFilter } = require('../middleware/privacyFilter');
 const incidentService = require('../services/incidentService');
 
 const REQUIRED_FIELDS = ['timestamp', 'website', 'event_type'];
+const REQUIRED_STRING_FIELDS = ['website', 'event_type'];
+const OPTIONAL_STRING_FIELDS = ['field_type', 'script_origin', 'destination', 'vector', 'policy', 'action', 'incident_id'];
 
 module.exports = (db) => {
   const router = express.Router();
@@ -20,6 +22,17 @@ module.exports = (db) => {
         error: 'MALFORMED_INPUT',
         message: `Missing required field(s): ${missing.join(', ')}`
       });
+    }
+
+    const badStringField = [...REQUIRED_STRING_FIELDS, ...OPTIONAL_STRING_FIELDS].find(
+      (field) => body[field] !== undefined && body[field] !== null && typeof body[field] !== 'string'
+    );
+    if (badStringField) {
+      return res.status(400).json({ error: 'MALFORMED_INPUT', message: `${badStringField} must be a string.` });
+    }
+
+    if (Number.isNaN(new Date(body.timestamp).getTime())) {
+      return res.status(400).json({ error: 'MALFORMED_INPUT', message: 'timestamp must be a valid date/time.' });
     }
 
     if (body.severity && !incidentService.VALID_SEVERITIES.includes(body.severity)) {

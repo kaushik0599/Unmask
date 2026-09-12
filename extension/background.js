@@ -5,7 +5,7 @@
 // to the existing backend /events endpoint. Never blocks or breaks the page -
 // failures here are swallowed after a small bounded number of attempts.
 
-const BACKEND_URL = 'http://localhost:3001/events';
+const BACKEND_URL = 'http://localhost:4000/events';
 const REQUEST_TIMEOUT_MS = 3000;
 const MAX_ATTEMPTS = 2;
 
