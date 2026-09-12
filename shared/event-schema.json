@@ -1,0 +1,68 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "UnmaskSecurityEvent",
+  "description": "A single privacy-safe browser security event ingested by the UNMASK backend. Contains only metadata about a suspicious behavior, never plaintext secret values.",
+  "type": "object",
+  "required": ["timestamp", "website", "event_type"],
+  "properties": {
+    "event_id": {
+      "type": "string",
+      "description": "Server-generated unique identifier for the event. Any client-supplied value is ignored."
+    },
+    "incident_id": {
+      "type": "string",
+      "description": "Optional incident to attach this event to. If omitted, the server groups the event automatically."
+    },
+    "timestamp": {
+      "type": "string",
+      "format": "date-time",
+      "description": "ISO 8601 timestamp of when the event occurred."
+    },
+    "tab_id": {
+      "type": ["string", "number"],
+      "description": "Browser tab identifier the event was observed in."
+    },
+    "website": {
+      "type": "string",
+      "description": "Origin/hostname where the event occurred."
+    },
+    "field_type": {
+      "type": "string",
+      "description": "Classification of the form field involved (e.g. 'password', 'creditCard'). This is a category label, never the actual field value."
+    },
+    "script_origin": {
+      "type": "string",
+      "description": "Origin of the script responsible for the observed behavior."
+    },
+    "event_type": {
+      "type": "string",
+      "description": "Category of the security event (e.g. 'exfiltration_attempt', 'clipboard_read', 'form_scrape')."
+    },
+    "destination": {
+      "type": "string",
+      "description": "Destination host/origin data was observed being sent to, if any."
+    },
+    "vector": {
+      "type": "string",
+      "description": "Mechanism used (e.g. 'fetch', 'beacon', 'websocket', 'clipboard')."
+    },
+    "policy": {
+      "type": "string",
+      "description": "Policy or rule that was evaluated against this event."
+    },
+    "action": {
+      "type": "string",
+      "description": "Action taken as a result of the event (e.g. 'blocked', 'allowed', 'flagged')."
+    },
+    "severity": {
+      "type": "string",
+      "enum": ["low", "medium", "high", "critical"],
+      "description": "Severity of this individual event."
+    },
+    "metadata": {
+      "type": "object",
+      "description": "Freeform additional context. Must never contain plaintext secrets."
+    }
+  },
+  "additionalProperties": false
+}
