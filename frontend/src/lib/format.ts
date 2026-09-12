@@ -13,7 +13,9 @@ export function relativeTime(iso: string): string {
   return `${day}d ago`;
 }
 
-export function severityDotColor(severity: string): "red" | "amber" | "blue" | "green" {
+export function severityDotColor(
+  severity: string
+): "red" | "amber" | "grey" | "green" {
   switch (severity) {
     case "critical":
     case "high":
@@ -21,7 +23,7 @@ export function severityDotColor(severity: string): "red" | "amber" | "blue" | "
     case "medium":
       return "amber";
     case "low":
-      return "blue";
+      return "grey";
     default:
       return "green";
   }

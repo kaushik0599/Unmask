@@ -1,5 +1,5 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import Landing from "@/pages/Landing";
+import Landing from "@/landing/Landing";
 import ConsoleOverview from "@/pages/ConsoleOverview";
 import Investigate from "@/pages/Investigate";
 import IncidentCenter from "@/pages/IncidentCenter";

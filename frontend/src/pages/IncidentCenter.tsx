@@ -48,7 +48,7 @@ export default function IncidentCenter() {
     <ConsoleShell>
       <div style={{ maxWidth: 980, margin: "0 auto", padding: "48px 32px" }}>
         <div className="flex items-center justify-between mb-8 flex-wrap gap-4">
-          <h1 className="font-bold" style={{ fontSize: 24, color: "#e8e2d8", letterSpacing: "-0.02em" }}>
+          <h1 className="font-bold" style={{ fontSize: 24, color: "#eaf6ec", letterSpacing: "-0.02em" }}>
             Incident Center
           </h1>
         </div>
@@ -87,7 +87,7 @@ export default function IncidentCenter() {
         ) : null}
 
         {state === "loading" && (
-          <div className="card rounded-xl px-5 py-10 text-center font-mono text-xs" style={{ color: "#44506a" }}>
+          <div className="card rounded-xl px-5 py-10 text-center font-mono text-xs" style={{ color: "#4c5b51" }}>
             Loading incidents…
           </div>
         )}
@@ -102,14 +102,14 @@ export default function IncidentCenter() {
           </div>
         )}
         {state === "empty" && (
-          <div className="card rounded-xl px-5 py-10 text-center font-mono text-xs" style={{ color: "#44506a" }}>
+          <div className="card rounded-xl px-5 py-10 text-center font-mono text-xs" style={{ color: "#4c5b51" }}>
             No incidents yet.
           </div>
         )}
 
         {(state === "ready") && (
           filtered.length === 0 ? (
-            <div className="card rounded-xl px-5 py-10 text-center font-mono text-xs" style={{ color: "#44506a" }}>
+            <div className="card rounded-xl px-5 py-10 text-center font-mono text-xs" style={{ color: "#4c5b51" }}>
               No incidents match these filters.
             </div>
           ) : (
@@ -123,16 +123,16 @@ export default function IncidentCenter() {
                   <div className="flex items-center gap-4">
                     <div
                       className="flex-shrink-0 w-1 self-stretch rounded-full"
-                      style={{ background: inc.severity === "critical" ? "#ef4444" : inc.severity === "high" ? "#f87171" : inc.severity === "medium" ? "#fbbf24" : "#38bdf8" }}
+                      style={{ background: inc.severity === "critical" ? "#ef4444" : inc.severity === "high" ? "#f87171" : inc.severity === "medium" ? "#fbbf24" : "#8fa695" }}
                     />
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-3 mb-1.5 flex-wrap">
                         <span className={`badge badge-${inc.severity}`}>{inc.severity.toUpperCase()}</span>
-                        <span style={{ fontSize: 14, fontWeight: 500, color: "#e8e2d8" }}>{inc.title}</span>
+                        <span style={{ fontSize: 14, fontWeight: 500, color: "#eaf6ec" }}>{inc.title}</span>
                       </div>
                       <div className="flex gap-4 flex-wrap">
-                        <span className="font-mono text-xs" style={{ color: "#44506a" }}>{inc.website}</span>
-                        <span style={{ fontSize: 12, color: "#44506a" }}>{relativeTime(inc.updated_at)}</span>
+                        <span className="font-mono text-xs" style={{ color: "#4c5b51" }}>{inc.website}</span>
+                        <span style={{ fontSize: 12, color: "#4c5b51" }}>{relativeTime(inc.updated_at)}</span>
                       </div>
                     </div>
                     <span className="badge badge-info">{inc.status.toUpperCase()}</span>

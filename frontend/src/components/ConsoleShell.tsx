@@ -77,15 +77,15 @@ function Sidebar() {
       <div className="sidebar-brand px-5 py-5 border-b" style={{ borderColor: "rgba(255,255,255,0.06)" }}>
         <button onClick={() => navigate("/")} className="flex items-center gap-2.5">
           <svg viewBox="0 0 28 28" fill="none" width="24" height="24">
-            <path d="M14 2L24 6.5V15C24 21 14 26 14 26C14 26 4 21 4 15V6.5Z" fill="rgba(14,165,233,0.1)" stroke="#0ea5e9" strokeWidth="1.5" />
-            <path d="M9 14L13 18L20 11" stroke="#0ea5e9" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+            <path d="M14 2L24 6.5V15C24 21 14 26 14 26C14 26 4 21 4 15V6.5Z" fill="rgba(59,255,110,0.1)" stroke="#3bff6e" strokeWidth="1.5" />
+            <path d="M9 14L13 18L20 11" stroke="#3bff6e" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
           </svg>
-          <span style={{ fontWeight: 700, fontSize: 14, letterSpacing: "0.1em", color: "#e8e2d8" }}>UNMASK</span>
+          <span style={{ fontWeight: 700, fontSize: 14, letterSpacing: "0.1em", color: "#eaf6ec" }}>UNMASK</span>
         </button>
       </div>
 
       <div className="sidebar-workspace px-3 py-4 flex-1">
-        <div className="sidebar-label font-mono mb-2 px-3" style={{ fontSize: 9, color: "#44506a", letterSpacing: "0.1em" }}>
+        <div className="sidebar-label font-mono mb-2 px-3" style={{ fontSize: 9, color: "#4c5b51", letterSpacing: "0.1em" }}>
           WORKSPACE
         </div>
         <nav className="space-y-1">
@@ -102,15 +102,15 @@ function Sidebar() {
         </nav>
 
         <div className="sidebar-recent mt-8">
-          <div className="font-mono mb-2 px-3" style={{ fontSize: 9, color: "#44506a", letterSpacing: "0.1em" }}>
+          <div className="font-mono mb-2 px-3" style={{ fontSize: 9, color: "#4c5b51", letterSpacing: "0.1em" }}>
             RECENT INCIDENTS
           </div>
           <div className="space-y-1">
             {recentError && (
-              <div className="px-3 py-2 font-mono text-xs" style={{ color: "#44506a" }}>Backend unavailable.</div>
+              <div className="px-3 py-2 font-mono text-xs" style={{ color: "#4c5b51" }}>Backend unavailable.</div>
             )}
             {!recentError && recent !== null && recent.length === 0 && (
-              <div className="px-3 py-2 font-mono text-xs" style={{ color: "#44506a" }}>No incidents yet.</div>
+              <div className="px-3 py-2 font-mono text-xs" style={{ color: "#4c5b51" }}>No incidents yet.</div>
             )}
             {recent?.map((inc) => (
               <button
@@ -123,9 +123,9 @@ function Sidebar() {
               >
                 <div className="flex items-center gap-2 mb-0.5">
                   <span className={`status-dot status-dot-${severityDotColor(inc.severity)} flex-shrink-0`} />
-                  <span className="font-mono text-xs truncate" style={{ color: "#44506a" }}>{inc.website}</span>
+                  <span className="font-mono text-xs truncate" style={{ color: "#4c5b51" }}>{inc.website}</span>
                 </div>
-                <div style={{ fontSize: 11, color: "#44506a", paddingLeft: 14 }} className="truncate">
+                <div style={{ fontSize: 11, color: "#4c5b51", paddingLeft: 14 }} className="truncate">
                   {relativeTime(inc.updated_at)}
                 </div>
               </button>
@@ -135,13 +135,13 @@ function Sidebar() {
       </div>
 
       <div className="sidebar-status px-4 py-4 border-t" style={{ borderColor: "rgba(255,255,255,0.06)" }}>
-        <div className="font-mono text-xs mb-3" style={{ color: "#44506a", letterSpacing: "0.06em" }}>PROTECTION STATUS</div>
+        <div className="font-mono text-xs mb-3" style={{ color: "#4c5b51", letterSpacing: "0.06em" }}>PROTECTION STATUS</div>
         {protection.map((s) => (
           <div key={s.label} className="flex items-center justify-between py-1.5">
-            <span style={{ fontSize: 12, color: "#8a94a8" }}>{s.label}</span>
+            <span style={{ fontSize: 12, color: "#8fa695" }}>{s.label}</span>
             <div className="flex items-center gap-1.5">
               <span className={`status-dot status-dot-${s.ok ? "green" : "grey"}`} />
-              <span className="font-mono" style={{ fontSize: 10, color: s.ok ? "#22c55e" : "#44506a" }}>{s.status}</span>
+              <span className="font-mono" style={{ fontSize: 10, color: s.ok ? "#22c55e" : "#4c5b51" }}>{s.status}</span>
             </div>
           </div>
         ))}

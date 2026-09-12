@@ -44,10 +44,10 @@ export default function ConsoleOverview() {
     <ConsoleShell>
       <div style={{ maxWidth: 900, margin: "0 auto", padding: "48px 32px" }}>
         <div className="mb-12">
-          <h1 className="font-bold mb-2" style={{ fontSize: 28, color: "#e8e2d8", letterSpacing: "-0.02em" }}>
+          <h1 className="font-bold mb-2" style={{ fontSize: 28, color: "#eaf6ec", letterSpacing: "-0.02em" }}>
             {greeting}.
           </h1>
-          <p style={{ color: "#8a94a8", fontSize: 15 }}>
+          <p style={{ color: "#8fa695", fontSize: 15 }}>
             {ext.extensionConnected
               ? "Your browser is protected. UNMASK is watching sensitive data movement across your active session."
               : "Extension disconnected. Install and enable the UNMASK extension to begin watching live browser sessions."}
@@ -62,10 +62,10 @@ export default function ConsoleOverview() {
             { label: "TRUST GATE", ok: false, on: "ACTIVE", off: "NOT ENABLED" },
           ].map((item) => (
             <div key={item.label} className="card rounded-xl px-4 py-4">
-              <div className="font-mono text-xs mb-2" style={{ color: "#44506a", letterSpacing: "0.08em" }}>{item.label}</div>
+              <div className="font-mono text-xs mb-2" style={{ color: "#4c5b51", letterSpacing: "0.08em" }}>{item.label}</div>
               <div className="flex items-center gap-2">
                 <span className={`status-dot status-dot-${item.ok ? "green" : "grey"}`} />
-                <span className="font-mono text-xs font-semibold" style={{ color: item.ok ? "#22c55e" : "#44506a" }}>
+                <span className="font-mono text-xs font-semibold" style={{ color: item.ok ? "#22c55e" : "#4c5b51" }}>
                   {item.ok ? item.on : item.off}
                 </span>
               </div>
@@ -74,8 +74,8 @@ export default function ConsoleOverview() {
         </div>
 
         <div className="card rounded-2xl p-8 mb-10">
-          <h2 className="font-semibold mb-2" style={{ fontSize: 18, color: "#e8e2d8" }}>Investigate a website</h2>
-          <p className="mb-6" style={{ color: "#8a94a8", fontSize: 14 }}>
+          <h2 className="font-semibold mb-2" style={{ fontSize: 18, color: "#eaf6ec" }}>Investigate a website</h2>
+          <p className="mb-6" style={{ color: "#8fa695", fontSize: 14 }}>
             Enter any URL to review identity, scripts, data destinations, and risk indicators.
           </p>
           <form onSubmit={handleInvestigate} className="flex gap-3 flex-wrap">
@@ -97,10 +97,10 @@ export default function ConsoleOverview() {
 
         <div>
           <div className="flex items-center justify-between mb-5">
-            <h2 className="font-semibold" style={{ fontSize: 16, color: "#e8e2d8" }}>Recent Incidents</h2>
+            <h2 className="font-semibold" style={{ fontSize: 16, color: "#eaf6ec" }}>Recent Incidents</h2>
             <button
               className="font-mono text-xs"
-              style={{ color: "#0ea5e9", cursor: "pointer", background: "none", border: "none", padding: 0 }}
+              style={{ color: "#3bff6e", cursor: "pointer", background: "none", border: "none", padding: 0 }}
               onClick={() => navigate("/console/incidents")}
             >
               View all →
@@ -108,7 +108,7 @@ export default function ConsoleOverview() {
           </div>
 
           {state === "loading" && (
-            <div className="card rounded-xl px-5 py-8 text-center font-mono text-xs" style={{ color: "#44506a" }}>
+            <div className="card rounded-xl px-5 py-8 text-center font-mono text-xs" style={{ color: "#4c5b51" }}>
               Loading incidents…
             </div>
           )}
@@ -123,7 +123,7 @@ export default function ConsoleOverview() {
             </div>
           )}
           {state === "empty" && (
-            <div className="card rounded-xl px-5 py-8 text-center font-mono text-xs" style={{ color: "#44506a" }}>
+            <div className="card rounded-xl px-5 py-8 text-center font-mono text-xs" style={{ color: "#4c5b51" }}>
               No incidents yet.
             </div>
           )}
@@ -139,22 +139,22 @@ export default function ConsoleOverview() {
                   <div className="flex items-center gap-4">
                     <div
                       className="flex-shrink-0 w-1 self-stretch rounded-full"
-                      style={{ background: inc.severity === "critical" ? "#ef4444" : inc.severity === "high" ? "#f87171" : inc.severity === "medium" ? "#fbbf24" : "#38bdf8" }}
+                      style={{ background: inc.severity === "critical" ? "#ef4444" : inc.severity === "high" ? "#f87171" : inc.severity === "medium" ? "#fbbf24" : "#8fa695" }}
                     />
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-3 mb-1.5 flex-wrap">
                         <span className={`badge badge-${inc.severity}`}>{inc.severity.toUpperCase()}</span>
-                        <span style={{ fontSize: 14, fontWeight: 500, color: "#e8e2d8" }}>{inc.title}</span>
+                        <span style={{ fontSize: 14, fontWeight: 500, color: "#eaf6ec" }}>{inc.title}</span>
                       </div>
                       <div className="flex items-center gap-4 flex-wrap">
-                        <span className="font-mono text-xs" style={{ color: "#44506a" }}>{inc.website}</span>
-                        <span style={{ fontSize: 12, color: "#44506a" }}>{relativeTime(inc.updated_at)}</span>
-                        <span className="font-mono text-xs" style={{ color: "#44506a" }}>{inc.event_count ?? 0} event(s)</span>
+                        <span className="font-mono text-xs" style={{ color: "#4c5b51" }}>{inc.website}</span>
+                        <span style={{ fontSize: 12, color: "#4c5b51" }}>{relativeTime(inc.updated_at)}</span>
+                        <span className="font-mono text-xs" style={{ color: "#4c5b51" }}>{inc.event_count ?? 0} event(s)</span>
                       </div>
                     </div>
                     <div className="flex-shrink-0 flex items-center gap-3">
                       <span className="badge badge-info">{inc.status.toUpperCase()}</span>
-                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#44506a" strokeWidth="2">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#4c5b51" strokeWidth="2">
                         <path d="M9 18l6-6-6-6" />
                       </svg>
                     </div>
@@ -173,8 +173,8 @@ export default function ConsoleOverview() {
               { label: "Open status", val: openCount },
             ].map((s) => (
               <div key={s.label} className="card rounded-xl px-5 py-5">
-                <div className="font-bold mb-1" style={{ fontSize: 28, color: "#e8e2d8" }}>{s.val}</div>
-                <div style={{ fontSize: 13, color: "#8a94a8" }}>{s.label}</div>
+                <div className="font-bold mb-1" style={{ fontSize: 28, color: "#eaf6ec" }}>{s.val}</div>
+                <div style={{ fontSize: 13, color: "#8fa695" }}>{s.label}</div>
               </div>
             ))}
           </div>

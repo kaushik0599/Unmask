@@ -15,7 +15,7 @@ function parseUrl(raw: string): URL | null {
 function SectionCard({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <div className="card rounded-xl p-6 mb-6">
-      <div className="font-mono text-xs mb-4" style={{ color: "#44506a", letterSpacing: "0.1em" }}>{title}</div>
+      <div className="font-mono text-xs mb-4" style={{ color: "#4c5b51", letterSpacing: "0.1em" }}>{title}</div>
       {children}
     </div>
   );
@@ -23,7 +23,7 @@ function SectionCard({ title, children }: { title: string; children: React.React
 
 function NotAvailable({ reason }: { reason: string }) {
   return (
-    <div className="font-mono text-xs" style={{ color: "#44506a" }}>
+    <div className="font-mono text-xs" style={{ color: "#4c5b51" }}>
       Not available — {reason}
     </div>
   );
@@ -71,10 +71,10 @@ export default function Investigate() {
   return (
     <ConsoleShell>
       <div style={{ maxWidth: 860, margin: "0 auto", padding: "48px 32px" }}>
-        <h1 className="font-bold mb-2" style={{ fontSize: 24, color: "#e8e2d8", letterSpacing: "-0.02em" }}>
+        <h1 className="font-bold mb-2" style={{ fontSize: 24, color: "#eaf6ec", letterSpacing: "-0.02em" }}>
           Investigate Website
         </h1>
-        <p className="mb-8" style={{ color: "#8a94a8", fontSize: 14 }}>
+        <p className="mb-8" style={{ color: "#8fa695", fontSize: 14 }}>
           Enter a URL to review its identity and any incidents UNMASK has already recorded for it.
         </p>
 
@@ -106,8 +106,8 @@ export default function Investigate() {
                   ["Port", parsed.port || "default"],
                 ].map(([label, val]) => (
                   <div key={label} className="flex justify-between py-1.5" style={{ borderBottom: "1px solid rgba(255,255,255,0.04)" }}>
-                    <span className="font-mono text-xs" style={{ color: "#44506a" }}>{label}</span>
-                    <span className="font-mono text-xs" style={{ color: "#e8e2d8" }}>{val}</span>
+                    <span className="font-mono text-xs" style={{ color: "#4c5b51" }}>{label}</span>
+                    <span className="font-mono text-xs" style={{ color: "#eaf6ec" }}>{val}</span>
                   </div>
                 ))}
               </div>
@@ -126,11 +126,11 @@ export default function Investigate() {
             </SectionCard>
 
             <SectionCard title="DATA RISK">
-              {relatedState === "loading" && <div className="font-mono text-xs" style={{ color: "#44506a" }}>Checking incident history…</div>}
+              {relatedState === "loading" && <div className="font-mono text-xs" style={{ color: "#4c5b51" }}>Checking incident history…</div>}
               {relatedState === "unavailable" && <div className="font-mono text-xs" style={{ color: "#ef4444" }}>Backend unavailable.</div>}
               {relatedState === "error" && <div className="font-mono text-xs" style={{ color: "#ef4444" }}>Unable to check incident history.</div>}
               {relatedState === "ready" && related && related.length === 0 && (
-                <div className="font-mono text-xs" style={{ color: "#44506a" }}>No prior incidents recorded for this site.</div>
+                <div className="font-mono text-xs" style={{ color: "#4c5b51" }}>No prior incidents recorded for this site.</div>
               )}
               {relatedState === "ready" && related && related.length > 0 && (
                 <div className="space-y-2">
@@ -140,8 +140,8 @@ export default function Investigate() {
                   {related.slice(0, 3).map((inc) => (
                     <div key={inc.id} className="flex items-center justify-between px-3 py-2 rounded" style={{ background: "rgba(255,255,255,0.02)" }}>
                       <span className={`badge badge-${inc.severity}`}>{inc.severity.toUpperCase()}</span>
-                      <span className="font-mono text-xs flex-1 mx-3 truncate" style={{ color: "#c8bfb0" }}>{inc.title}</span>
-                      <span className="font-mono text-xs" style={{ color: "#44506a" }}>{relativeTime(inc.updated_at)}</span>
+                      <span className="font-mono text-xs flex-1 mx-3 truncate" style={{ color: "#a9b8ab" }}>{inc.title}</span>
+                      <span className="font-mono text-xs" style={{ color: "#4c5b51" }}>{relativeTime(inc.updated_at)}</span>
                     </div>
                   ))}
                 </div>
@@ -149,7 +149,7 @@ export default function Investigate() {
             </SectionCard>
 
             <SectionCard title="RECOMMENDATION">
-              <p className="mb-4" style={{ fontSize: 14, color: "#c8bfb0", lineHeight: 1.75 }}>
+              <p className="mb-4" style={{ fontSize: 14, color: "#a9b8ab", lineHeight: 1.75 }}>
                 {related && related.length > 0
                   ? "UNMASK has recorded prior incidents for this site. Opening it under protection will let Data X-Ray and the Firewall watch for sensitive-data egress in real time."
                   : "UNMASK has no recorded history for this site. Opening it under protection will let Data X-Ray and the Firewall watch for sensitive-data egress in real time."}
@@ -165,7 +165,7 @@ export default function Investigate() {
         )}
 
         {!target && (
-          <div className="card rounded-xl p-10 text-center font-mono text-xs" style={{ color: "#44506a" }}>
+          <div className="card rounded-xl p-10 text-center font-mono text-xs" style={{ color: "#4c5b51" }}>
             No active investigation. Enter a URL above to begin.
           </div>
         )}
